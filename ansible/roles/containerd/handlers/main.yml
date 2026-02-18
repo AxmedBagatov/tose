@@ -1,0 +1,7 @@
+---
+# handlers file for roles/containerd
+- name: restart containerd
+  systemd:
+    name: containerd
+    state: restarted
+    enabled: true

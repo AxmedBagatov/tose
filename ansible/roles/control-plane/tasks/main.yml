@@ -1,0 +1,55 @@
+---
+# tasks file for control-plane
+
+- name: Create kubeadm config directory
+  file:
+    path: /etc/kubeadm
+    state: directory
+    mode: '0755'
+
+- name: Create kubeadm init config
+  template:
+    src: kubeadm-init-config.yaml.j2
+    dest: /etc/kubeadm/kubeadm-init-config.yaml
+    mode: '0644'
+
+- name: Initialize Kubernetes control plane
+  command: kubeadm init --config /etc/kubeadm/kubeadm-init-config.yaml
+  args:
+    creates: /etc/kubernetes/admin.conf
+  register: kubeadm_init
+
+- name: Generate kubeadm token for worker nodes
+  command: kubeadm token create --print-join-command
+  register: kubeadm_join
+  changed_when: false
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: Set join command for workers
+  set_fact:
+    kubeadm_join_command: "{{ kubeadm_join.stdout }}"
+
+- name: Ensure .kube directory exists in user's home
+  file:
+    path: "/home/{{ ansible_user }}/.kube"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+
+- name: Copy kubeconfig to user's home
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "/home/{{ ansible_user }}/.kube/config"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+    remote_src: yes
+
+
+- name: Install Flannel CNI
+  command: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  run_once: true

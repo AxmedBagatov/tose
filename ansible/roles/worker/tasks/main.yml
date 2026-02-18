@@ -1,0 +1,14 @@
+---
+# tasks file for worker
+
+- name: Wait for control plane API to be ready
+  wait_for:
+    host: "{{ hostvars['vps-kuber-1'].ansible_host }}"
+    port: 6443
+    timeout: 300
+
+- name: Join worker nodes to Kubernetes cluster
+  command: "{{ hostvars['vps-kuber-1'].kubeadm_join_command }} --ignore-preflight-errors=all"
+  become: yes
+  args:
+    creates: /etc/kubernetes/kubelet.conf

@@ -1,0 +1,31 @@
+---
+# tasks file for roles/common
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Remove swap from fstab
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*swap.*)$'
+    replace: '# \1'
+
+- name: Load br_netfilter module
+  modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Ensure MTU is 1400
+  become: yes
+  command: ip link set dev {{ ansible_default_ipv4.interface }} mtu 1400
+
+
+- name: Set sysctl params for Kubernetes
+  sysctl:
+    name: "{{ item }}"
+    value: "1"
+    state: present
+    reload: yes
+  loop:
+    - net.bridge.bridge-nf-call-iptables
+    - net.ipv4.ip_forward

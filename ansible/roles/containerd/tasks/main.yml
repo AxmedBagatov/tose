@@ -1,0 +1,44 @@
+---
+# tasks file for roles/containerd
+- name: Install required packages for containerd
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+    update_cache: yes
+
+
+- name: Add Docker GPG key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable"
+    state: present
+
+- name: Install containerd
+  apt:
+    name: containerd.io
+    state: present
+
+
+- name: Create default containerd config
+  command: containerd config default
+  register: containerd_default_config
+  changed_when: false
+
+- name: Write containerd config
+  copy:
+    dest: /etc/containerd/config.toml
+    content: "{{ containerd_default_config.stdout }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart containerd

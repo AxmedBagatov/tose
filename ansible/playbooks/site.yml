@@ -1,0 +1,15 @@
+- name: Apply common setup on all nodes
+  hosts: all
+  become: true
+  roles: 
+     - common
+     - containerd
+     - kube-packages
+
+- hosts: control
+  roles:
+    - control-plane
+
+- hosts: workers
+  roles:
+    - worker

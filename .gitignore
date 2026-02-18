@@ -1,0 +1,37 @@
+# Terraform state files (содержат реальные IP и ключи)
+terraform/terraform-openstack/terraform.tfstate
+terraform/terraform-openstack/terraform.tfstate.backup
+
+# Terraform variables с секретами
+terraform/terraform-openstack/terraform.tfvars
+terraform/terraform-openstack/variables.tf
+terraform/terraform-openstack/inventory.json
+terraform/openrc.sh
+
+# Ansible inventory и тестовые инвентори
+ansible/inventory.yml
+ansible/roles/**/tests/inventory
+
+# Личные или временные настройки пользователя
+*.retry
+*.log
+*.pyc
+__pycache__/
+.vscode-server/
+.ansible/
+.ssh/
+.cache/
+.local/
+.acme.sh/
+.bashrc
+.config/
+# Terraform локальные директории
+.terraform/
+.terraform.d/
+.terraform.lock.hcl
+
+# Bash history и конфиги терминала
+.bash_history
+.profile
+.selected_editor
+.wget-hsts
